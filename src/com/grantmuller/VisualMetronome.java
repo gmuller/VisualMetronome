@@ -117,6 +117,7 @@ public class VisualMetronome implements ActionListener {
 			break;
 		case SyncEvent.STOP:
 			embed.reset();
+			pulseCount = 0;
 			started = false; 
 			break;
 		case SyncEvent.SONG_POSITION_POINTER:
@@ -170,7 +171,8 @@ public class VisualMetronome implements ActionListener {
 		}
 
 		public void step (){
-			xLoc = xLoc + (width/ppq * xDir);
+			float innerWidth = width - (2 * radius);
+			xLoc = xLoc + (innerWidth/ppq * xDir);
 			if (pulseCount % ppq == 0) {
 				xDir *= -1;
 			}
@@ -199,6 +201,7 @@ public class VisualMetronome implements ActionListener {
 		if (command.contains("midi---")){
 			int midiIn = Integer.valueOf(command.split("---")[1]);
 			syncIn.closeMidi();
+			syncIn =  RWMidi.getInputDevices()[midiIn].createInput();
 			if (syncIn != null){
 				syncIn.plug(this, "processEvents");
 			}

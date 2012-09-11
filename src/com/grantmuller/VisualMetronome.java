@@ -109,9 +109,7 @@ public class VisualMetronome implements ActionListener {
 	public void processEvents(SyncEvent syncEvent){
 		switch (syncEvent.getStatus()){
 		case SyncEvent.TIMING_CLOCK:
-			Long now = System.nanoTime();
-			System.out.println(now - previousPulseTime);
-			previousPulseTime = now;
+			pulseCount++;
 			embed.step();
 			break;
 		case SyncEvent.START: 
@@ -128,15 +126,19 @@ public class VisualMetronome implements ActionListener {
 
 	class EmbeddedProcessing extends PApplet {
 
-		public boolean reset;
+		boolean reset;
 
-		int xLoc = 20;
+		float xLoc = 20;
 
-		int xDir = 1;
+		float xDir = 1;
 
-		int radius = 20;
+		float radius = 20;
 		
-		int ppq = 24;
+		boolean flash = false;
+		
+		int divisor = 4;
+		
+		float ppq = 24;
 		
 		/**
 		 * 
@@ -146,7 +148,7 @@ public class VisualMetronome implements ActionListener {
 		public void setup() {
 			stroke(255);
 			ellipseMode(RADIUS);
-			frameRate(24);
+			noLoop();
 		}
 
 		public void draw() {
@@ -155,6 +157,12 @@ public class VisualMetronome implements ActionListener {
 				rect(0, 0, width, height);
 				reset = false;
 			}
+			
+			if (flash) {
+				fill(255, 255, 255, 50);
+				rect(0, 0, width, height);
+			}
+			
 			fill(0, 0, 0, 50);
 			rect(0, 0, width, height);
 			fill(255, 0, 0);
@@ -162,19 +170,22 @@ public class VisualMetronome implements ActionListener {
 		}
 
 		public void step (){
-			int step = width/ppq;
-			xLoc = xLoc + (step * xDir);
-			if (xLoc > width - radius || xLoc < 0) {
+			xLoc = xLoc + (width/ppq * xDir);
+			if (pulseCount % ppq == 0) {
 				xDir *= -1;
 			}
-			//redraw();
+			
+			if (pulseCount % (ppq * divisor) == 0) {
+				flash = true;
+			}
+			redraw();
 		}
 
 		public void reset() {
 			xLoc = radius;
 			xDir = 1;
 			reset = true;
-			//redraw();
+			redraw();
 		}
 	}
 

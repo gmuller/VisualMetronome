@@ -1,5 +1,6 @@
 package com.grantmuller;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -29,6 +30,8 @@ public class VisualMetronome implements ActionListener {
 	int pulseCount = 0;
 
 	int divisor = 4;
+	
+	int barLength = 4;
 
 	int ppq = 24;
 
@@ -65,7 +68,7 @@ public class VisualMetronome implements ActionListener {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 
-		visualizer = new Visualizer();
+		visualizer = new Visualizer(Color.BLACK.getRGB(), Color.RED.getRGB(), Color.GREEN.getRGB());
 		frame.getContentPane().add(visualizer);
 		visualizer.init();
 		frame.addComponentListener(
@@ -80,9 +83,10 @@ public class VisualMetronome implements ActionListener {
 					} 
 				});
 
+		// Add Midi Settings
 		JMenuBar menuBar = new JMenuBar();
-		JMenu settingsMenu = new JMenu("Settings");
-		menuBar.add(settingsMenu);
+		JMenu midiSettingsMenu = new JMenu("MIDI Settings");
+		menuBar.add(midiSettingsMenu);
 
 		JMenu PPQ = new JMenu("PPQ");
 		ButtonGroup ppqGroup = new ButtonGroup();
@@ -97,7 +101,7 @@ public class VisualMetronome implements ActionListener {
 			PPQ.add(ppqOpt);
 			ppqGroup.add(ppqOpt);
 		}
-		settingsMenu.add(PPQ);
+		midiSettingsMenu.add(PPQ);
 
 		ButtonGroup midiGroup = new ButtonGroup();
 		JMenu MIDI = new JMenu("Midi Input");
@@ -111,7 +115,38 @@ public class VisualMetronome implements ActionListener {
 			MIDI.add(midiIn);
 			midiGroup.add(midiIn);
 		}
-		settingsMenu.add(MIDI);
+		midiSettingsMenu.add(MIDI);
+		
+		int[] divisors = {1, 2, 3, 4, 5, 6, 7, 9, 11, 13};
+		ButtonGroup divisorGroup = new ButtonGroup();
+		JMenu divisorMenu = new JMenu("Beat Division");
+		for (int i : divisors) {
+			JRadioButtonMenuItem divisor = new JRadioButtonMenuItem(String.valueOf(i));
+			divisor.setActionCommand("divisor---"+ i);
+			divisor.addActionListener(this);
+			if (i == 4) divisor.setSelected(true);
+			divisorMenu.add(divisor);
+			divisorGroup.add(divisor);
+		}
+		midiSettingsMenu.add(divisorMenu);
+		
+		int[] barlengths = {1, 2, 4, 8};
+		ButtonGroup barlengthGroup = new ButtonGroup();
+		JMenu barLengthMenu = new JMenu("Bar Length");
+		for (int i : barlengths) {
+			JRadioButtonMenuItem bar = new JRadioButtonMenuItem(String.valueOf(i));
+			bar.setActionCommand("bar---"+ i);
+			bar.addActionListener(this);
+			if (i == 4) bar.setSelected(true);
+			barLengthMenu.add(bar);
+			barlengthGroup.add(bar);
+		}
+		midiSettingsMenu.add(barLengthMenu);
+		
+		//Add Color Settings
+		JMenu colorSettings = new JMenu("Colors");
+		menuBar.add(colorSettings);
+
 		frame.setJMenuBar(menuBar);
 
 		syncIn =  RWMidi.getInputDevices()[0].createInput();
@@ -124,7 +159,7 @@ public class VisualMetronome implements ActionListener {
 		switch (syncEvent.getStatus()){
 		case SyncEvent.TIMING_CLOCK:
 			pulseCount++;
-			visualizer.step(pulseCount, ppq, divisor);
+			visualizer.step(pulseCount, ppq, divisor, barLength);
 			break;
 		case SyncEvent.START:
 			break;
@@ -152,6 +187,14 @@ public class VisualMetronome implements ActionListener {
 			if (syncIn != null){
 				syncIn.plug(this, "processEvents");
 			}
+		}
+		
+		if (command.contains("divisor---")){
+			divisor = Integer.valueOf(command.split("---")[1]);
+		}
+		
+		if (command.contains("bar---")){
+			barLength = Integer.valueOf(command.split("---")[1]);
 		}
 	}
 }

@@ -1,8 +1,10 @@
 package com.grantmuller;
 
+import java.awt.Color;
+
 import processing.core.PApplet;
 
-public class Visualizer extends PApplet {
+public class Visualizer extends PApplet{
 	
 	private boolean reset;
 
@@ -15,62 +17,76 @@ public class Visualizer extends PApplet {
 	private int location = 0;
 
 	private float[] steps;
+	
+	private int backgroundColor = color(0);
+
+	private int ballColor = color(255);
+	
+	private int flashColor = color(51, 255, 51);
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public Visualizer(int backgroundColor, int ballColor, int flashColor) {
+		this.backgroundColor = backgroundColor;
+		this.ballColor = ballColor;
+		this.flashColor = flashColor;
+	}
 
 	public void setup() {
-		stroke(255);
+		stroke(Color.WHITE.getRGB());
 		ellipseMode(RADIUS);
 		noLoop();
 		size(500, 100);
 	}
 
 	public void updateSize(int w, int ppq) {
+		int tableSize = 2 * ppq * 4;
 		float innerWidth = width - (2 * radius);
-		float step = innerWidth/ppq;
-		steps = new float[(int) ppq * 2];
+		float step = innerWidth/(ppq * 4f);
+		steps = new float[tableSize];
 		float start = radius;
-		for (int i = 0; i < (2 * ppq); i++) {
+		for (int i = 0; i < tableSize; i++) {
 			steps[i] = start;
-			if (i < ppq) {
+			if (i < (ppq * 4)) {
 				start += step;
 			} else {
 				start -= step;
 			}
-			System.out.println("Step " + i + " is : " + start);
+			System.out.println(i + ":" + start);
 		}
 	}
 
 	public void draw() {
 		if (reset) {
-			fill(0);
+			fill(backgroundColor);
 			rect(0, 0, width, height);
 			reset = false;
 		}
 
 		if (flash) {
-			fill(255, 255, 255);
+			fill(flashColor);
 			rect(0, 0, width, height);
 			flash = false;
 		}
 
-		fill(0, 0, 0, 50);
+		fill(backgroundColor, 50);
 		rect(0, 0, width, height);
-		fill(255, 0, 0);
+		fill(ballColor);
 		ellipse(xLoc, radius, radius, radius);
 	}
 
-	public void step (int pulseCount, int ppq, int divisor){
-		if (pulseCount % (2 * ppq) == 0) {
+	public void step (int pulseCount, int ppq, int divisor, int barlength){
+		int size = 8/barlength;
+		if (pulseCount % (size * ppq) == 0) {
 			location = 0;
 		}
 		xLoc = steps[location];
-		location++;
+		location += barlength;
 
-		if (pulseCount % (ppq * divisor) == 0) {
+		if (pulseCount % (size/2f * ppq * divisor) == 0) {
 			flash = true;
 		}
 		redraw();
@@ -81,5 +97,17 @@ public class Visualizer extends PApplet {
 		location = 0;
 		reset = true;
 		redraw();
+	}
+
+	public void setBackgroundColor(int backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	public void setBallColor(int ballColor) {
+		this.ballColor = ballColor;
+	}
+
+	public void setFlashColor(int flashColor) {
+		this.flashColor = flashColor;
 	}
 }

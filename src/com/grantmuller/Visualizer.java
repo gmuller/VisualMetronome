@@ -4,7 +4,7 @@ import processing.core.PApplet;
 
 public class Visualizer extends PApplet {
 	
-	boolean reset;
+	private boolean reset;
 
 	private float xLoc = 20;
 

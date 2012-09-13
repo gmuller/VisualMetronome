@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -11,7 +13,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButtonMenuItem;
 
-import processing.core.PApplet;
 import rwmidi.MidiInput;
 import rwmidi.MidiInputDevice;
 import rwmidi.RWMidi;
@@ -20,14 +21,16 @@ import rwmidi.SyncEvent;
 public class VisualMetronome implements ActionListener {
 
 	private JFrame frame;
-	
-	EmbeddedProcessing embed;
-	
+
+	Visualizer visualizer;
+
 	MidiInput syncIn;
-	
+
 	int pulseCount = 0;
-	
-	boolean started = false;
+
+	int divisor = 4;
+
+	int ppq = 24;
 
 	Long previousPulseTime = 0L;
 	/**
@@ -58,13 +61,24 @@ public class VisualMetronome implements ActionListener {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 500, 75);
+		frame.setBounds(100, 100, 500, 100);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 
-		embed = new EmbeddedProcessing();
-		frame.getContentPane().add(embed);
-		embed.init();
+		visualizer = new Visualizer();
+		frame.getContentPane().add(visualizer);
+		visualizer.init();
+		frame.addComponentListener(
+				new ComponentAdapter(){ 
+					int w;
+
+					@Override 
+					public void componentResized(ComponentEvent e) { 
+						JFrame f = (JFrame)e.getComponent(); 
+						w = f.getSize().width;
+						visualizer.updateSize(w, ppq);
+					} 
+				});
 
 		JMenuBar menuBar = new JMenuBar();
 		JMenu settingsMenu = new JMenu("Settings");
@@ -99,95 +113,27 @@ public class VisualMetronome implements ActionListener {
 		}
 		settingsMenu.add(MIDI);
 		frame.setJMenuBar(menuBar);
-		
+
 		syncIn =  RWMidi.getInputDevices()[0].createInput();
 		if (syncIn != null){
 			syncIn.plug(this, "processEvents");
 		}
 	}
-	
+
 	public void processEvents(SyncEvent syncEvent){
 		switch (syncEvent.getStatus()){
 		case SyncEvent.TIMING_CLOCK:
 			pulseCount++;
-			embed.step();
+			visualizer.step(pulseCount, ppq, divisor);
 			break;
-		case SyncEvent.START: 
-			started = true; 
+		case SyncEvent.START:
 			break;
 		case SyncEvent.STOP:
-			embed.reset();
+			visualizer.reset();
 			pulseCount = 0;
-			started = false; 
 			break;
 		case SyncEvent.SONG_POSITION_POINTER:
 			break;
-		}
-	}
-
-	class EmbeddedProcessing extends PApplet {
-
-		boolean reset;
-
-		float xLoc = 20;
-
-		float xDir = 1;
-
-		float radius = 20;
-		
-		boolean flash = false;
-		
-		int divisor = 4;
-		
-		float ppq = 24;
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public void setup() {
-			stroke(255);
-			ellipseMode(RADIUS);
-			noLoop();
-		}
-
-		public void draw() {
-			if (reset) {
-				fill(0);
-				rect(0, 0, width, height);
-				reset = false;
-			}
-			
-			if (flash) {
-				fill(255, 255, 255, 50);
-				rect(0, 0, width, height);
-			}
-			
-			fill(0, 0, 0, 50);
-			rect(0, 0, width, height);
-			fill(255, 0, 0);
-			ellipse(xLoc, radius, radius, radius);
-		}
-
-		public void step (){
-			float innerWidth = width - (2 * radius);
-			xLoc = xLoc + (innerWidth/ppq * xDir);
-			if (pulseCount % ppq == 0) {
-				xDir *= -1;
-			}
-			
-			if (pulseCount % (ppq * divisor) == 0) {
-				flash = true;
-			}
-			redraw();
-		}
-
-		public void reset() {
-			xLoc = radius;
-			xDir = 1;
-			reset = true;
-			redraw();
 		}
 	}
 
@@ -195,7 +141,8 @@ public class VisualMetronome implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
 		if (command.contains("ppq")) {
-			embed.ppq = Integer.valueOf(command.substring(3, command.length()));
+			ppq = Integer.valueOf(command.substring(3, command.length()));
+			visualizer.updateSize(frame.getSize().width, ppq);
 		}
 
 		if (command.contains("midi---")){

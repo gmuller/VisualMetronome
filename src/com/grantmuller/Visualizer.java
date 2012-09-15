@@ -10,19 +10,21 @@ public class Visualizer extends PApplet{
 
 	private float xLoc = 20;
 
-	private float radius = 20;
-
 	private boolean flash = false;
 
 	private int location = 0;
 
 	private float[] steps;
 	
-	private int backgroundColor = color(0);
+	private int backgroundColor;
 
-	private int ballColor = color(255);
+	private int ballColor;
 	
-	private int flashColor = color(51, 255, 51);
+	private int flashColor;
+	
+	private BallSize ballSize;
+	
+	public boolean started;
 
 	/**
 	 * 
@@ -33,6 +35,8 @@ public class Visualizer extends PApplet{
 		this.backgroundColor = backgroundColor;
 		this.ballColor = ballColor;
 		this.flashColor = flashColor;
+		ballSize = BallSize.MEDIUM;
+		this.started = false;
 	}
 
 	public void setup() {
@@ -44,10 +48,10 @@ public class Visualizer extends PApplet{
 
 	public void updateSize(int w, int ppq) {
 		int tableSize = 2 * ppq * 4;
-		float innerWidth = width - (2 * radius);
+		float innerWidth = width - (2 * ballSize.size);
 		float step = innerWidth/(ppq * 4f);
 		steps = new float[tableSize];
-		float start = radius;
+		float start = ballSize.size;
 		for (int i = 0; i < tableSize; i++) {
 			steps[i] = start;
 			if (i < (ppq * 4)) {
@@ -55,7 +59,6 @@ public class Visualizer extends PApplet{
 			} else {
 				start -= step;
 			}
-			System.out.println(i + ":" + start);
 		}
 	}
 
@@ -75,7 +78,7 @@ public class Visualizer extends PApplet{
 		fill(backgroundColor, 50);
 		rect(0, 0, width, height);
 		fill(ballColor);
-		ellipse(xLoc, radius, radius, radius);
+		ellipse(xLoc, height-ballSize.size - 5, ballSize.size, ballSize.size);
 	}
 
 	public void step (int pulseCount, int ppq, int divisor, int barlength){
@@ -93,7 +96,7 @@ public class Visualizer extends PApplet{
 	}
 
 	public void reset() {
-		xLoc = radius;
+		xLoc = ballSize.size;
 		location = 0;
 		reset = true;
 		redraw();
@@ -101,13 +104,54 @@ public class Visualizer extends PApplet{
 
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
+		redraw();
 	}
 
 	public void setBallColor(int ballColor) {
 		this.ballColor = ballColor;
+		redraw();
 	}
 
 	public void setFlashColor(int flashColor) {
 		this.flashColor = flashColor;
+		redraw();
+	}
+	
+	public int getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public int getBallColor() {
+		return ballColor;
+	}
+
+	public int getFlashColor() {
+		return flashColor;
+	}
+	
+	public void setBallSize(BallSize ballSize) {
+		this.ballSize = ballSize;
+		if (!started) {
+			reset();
+		}
+	}
+	
+	enum BallSize {
+		SMALL("Small", 10, 80),
+		MEDIUM("Medium", 20, 100),
+		LARGE("Large", 40, 140),
+		EXTRA_LARGE("X-Large", 80, 220);
+		
+		String displayName;
+		
+		int size;
+		
+		int containerSize;
+		
+		BallSize(String name, int size, int containerSize) {
+			this.displayName = name;
+			this.size = size;
+			this.containerSize = containerSize;
+		}
 	}
 }

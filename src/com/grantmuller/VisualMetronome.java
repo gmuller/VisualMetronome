@@ -9,33 +9,48 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import com.grantmuller.Visualizer.BallSize;
 
 import rwmidi.MidiInput;
 import rwmidi.MidiInputDevice;
 import rwmidi.RWMidi;
 import rwmidi.SyncEvent;
 
-public class VisualMetronome implements ActionListener {
+public class VisualMetronome implements ActionListener, ChangeListener {
 
 	private JFrame frame;
 
-	Visualizer visualizer;
+	private Visualizer visualizer;
 
-	MidiInput syncIn;
-
-	int pulseCount = 0;
-
-	int divisor = 4;
+	private MidiInput syncIn;
 	
-	int barLength = 4;
+	private static int[] divisors = {1, 2, 3, 4, 5, 6, 7, 9, 11, 13};
+	
+	private static int[] barlengths = {1, 2, 4, 8};
+	
+	private static String[] ppqOptions = {"24","96"};
 
-	int ppq = 24;
+	private int pulseCount = 0;
 
-	Long previousPulseTime = 0L;
+	private int divisor = 4;
+	
+	private int barLength = 4;
+
+	private int ppq = 24;
+	
+	private JColorChooser bgChooser;
+
+	private JColorChooser ballColorChooser;
+
+	private JColorChooser flashColorChooser;
 	/**
 	 * Launch the application.
 	 */
@@ -66,7 +81,7 @@ public class VisualMetronome implements ActionListener {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 500, 100);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
+		//frame.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 
 		visualizer = new Visualizer(Color.BLACK.getRGB(), Color.RED.getRGB(), Color.GREEN.getRGB());
 		frame.getContentPane().add(visualizer);
@@ -90,7 +105,6 @@ public class VisualMetronome implements ActionListener {
 
 		JMenu PPQ = new JMenu("PPQ");
 		ButtonGroup ppqGroup = new ButtonGroup();
-		String[] ppqOptions = {"24","96"};
 		for (String ppq : ppqOptions) {
 			JRadioButtonMenuItem ppqOpt = new JRadioButtonMenuItem(ppq);
 			ppqOpt.setActionCommand("ppq" + ppq);
@@ -116,8 +130,7 @@ public class VisualMetronome implements ActionListener {
 			midiGroup.add(midiIn);
 		}
 		midiSettingsMenu.add(MIDI);
-		
-		int[] divisors = {1, 2, 3, 4, 5, 6, 7, 9, 11, 13};
+				
 		ButtonGroup divisorGroup = new ButtonGroup();
 		JMenu divisorMenu = new JMenu("Beat Division");
 		for (int i : divisors) {
@@ -130,7 +143,6 @@ public class VisualMetronome implements ActionListener {
 		}
 		midiSettingsMenu.add(divisorMenu);
 		
-		int[] barlengths = {1, 2, 4, 8};
 		ButtonGroup barlengthGroup = new ButtonGroup();
 		JMenu barLengthMenu = new JMenu("Bar Length");
 		for (int i : barlengths) {
@@ -143,9 +155,40 @@ public class VisualMetronome implements ActionListener {
 		}
 		midiSettingsMenu.add(barLengthMenu);
 		
-		//Add Color Settings
-		JMenu colorSettings = new JMenu("Colors");
+		//Add Color and Size Settings
+		JMenu colorSettings = new JMenu("Visuals");
 		menuBar.add(colorSettings);
+		
+		JMenu bgColorSettings = new JMenu("Background");
+		colorSettings.add(bgColorSettings);
+		this.bgChooser = new JColorChooser(new Color(visualizer.getBackgroundColor()));
+		this.bgChooser.getSelectionModel().addChangeListener(this);
+		bgColorSettings.add(bgChooser);
+		
+		JMenu ballColorSettings = new JMenu("Ball");
+		colorSettings.add(ballColorSettings);
+		this.ballColorChooser = new JColorChooser(new Color(visualizer.getBallColor()));
+		this.ballColorChooser.getSelectionModel().addChangeListener(this);
+		ballColorSettings.add(ballColorChooser);
+		
+		JMenu flashColorSettings = new JMenu("Flash");
+		colorSettings.add(flashColorSettings);
+		this.flashColorChooser = new JColorChooser(new Color(visualizer.getFlashColor()));
+		this.flashColorChooser.getSelectionModel().addChangeListener(this);
+		flashColorSettings.add(flashColorChooser);
+		
+		//Add Ball Size Settings
+		JMenu ballSizeMenu = new JMenu("Ball Size");
+		ButtonGroup bSizeGroup = new ButtonGroup();
+		for (BallSize size : BallSize.values()) {
+			JRadioButtonMenuItem ballSize = new JRadioButtonMenuItem(size.displayName);
+			ballSize.setActionCommand("ball---"+ size);
+			ballSize.addActionListener(this);
+			if (size == BallSize.MEDIUM) ballSize.setSelected(true);
+			ballSizeMenu.add(ballSize);
+			bSizeGroup.add(ballSize);
+		}
+		colorSettings.add(ballSizeMenu);
 
 		frame.setJMenuBar(menuBar);
 
@@ -162,8 +205,10 @@ public class VisualMetronome implements ActionListener {
 			visualizer.step(pulseCount, ppq, divisor, barLength);
 			break;
 		case SyncEvent.START:
+			visualizer.started = true;
 			break;
 		case SyncEvent.STOP:
+			visualizer.started = false;
 			visualizer.reset();
 			pulseCount = 0;
 			break;
@@ -177,7 +222,7 @@ public class VisualMetronome implements ActionListener {
 		String command = e.getActionCommand();
 		if (command.contains("ppq")) {
 			ppq = Integer.valueOf(command.substring(3, command.length()));
-			visualizer.updateSize(frame.getSize().width, ppq);
+			visualizer.updateSize(frame.getWidth(), ppq);
 		}
 
 		if (command.contains("midi---")){
@@ -196,5 +241,24 @@ public class VisualMetronome implements ActionListener {
 		if (command.contains("bar---")){
 			barLength = Integer.valueOf(command.split("---")[1]);
 		}
+		
+		if (command.contains("ball---")) {
+			String[] ball = command.split("---");
+			BallSize bSize = BallSize.valueOf(ball[1]);
+			int currentWidth = frame.getWidth();
+			frame.setSize(currentWidth, bSize.containerSize);
+			visualizer.setBallSize(bSize);
+		}
+	}
+	
+	public void stateChanged(ChangeEvent e) {
+		Color bgColor = bgChooser.getColor();
+	    visualizer.setBackgroundColor(bgColor.getRGB());
+	    
+	    Color ballColor = ballColorChooser.getColor();
+	    visualizer.setBallColor(ballColor.getRGB());
+	    
+	    Color flashColor = flashColorChooser.getColor();
+	    visualizer.setFlashColor(flashColor.getRGB());
 	}
 }

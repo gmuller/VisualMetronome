@@ -2,7 +2,6 @@ package com.grantmuller;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -14,15 +13,16 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSeparator;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import com.grantmuller.Visualizer.BallSize;
 
 import rwmidi.MidiInput;
 import rwmidi.MidiInputDevice;
 import rwmidi.RWMidi;
 import rwmidi.SyncEvent;
+
+import com.grantmuller.Visualizer.BallSize;
 
 public class VisualMetronome implements ActionListener, ChangeListener {
 
@@ -156,26 +156,28 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		midiSettingsMenu.add(barLengthMenu);
 		
 		//Add Color and Size Settings
-		JMenu colorSettings = new JMenu("Visuals");
-		menuBar.add(colorSettings);
+		JMenu visualSettings = new JMenu("Visuals");
+		menuBar.add(visualSettings);
 		
 		JMenu bgColorSettings = new JMenu("Background");
-		colorSettings.add(bgColorSettings);
+		visualSettings.add(bgColorSettings);
 		this.bgChooser = new JColorChooser(new Color(visualizer.getBackgroundColor()));
 		this.bgChooser.getSelectionModel().addChangeListener(this);
 		bgColorSettings.add(bgChooser);
 		
 		JMenu ballColorSettings = new JMenu("Ball");
-		colorSettings.add(ballColorSettings);
+		visualSettings.add(ballColorSettings);
 		this.ballColorChooser = new JColorChooser(new Color(visualizer.getBallColor()));
 		this.ballColorChooser.getSelectionModel().addChangeListener(this);
 		ballColorSettings.add(ballColorChooser);
 		
 		JMenu flashColorSettings = new JMenu("Flash");
-		colorSettings.add(flashColorSettings);
+		visualSettings.add(flashColorSettings);
 		this.flashColorChooser = new JColorChooser(new Color(visualizer.getFlashColor()));
 		this.flashColorChooser.getSelectionModel().addChangeListener(this);
 		flashColorSettings.add(flashColorChooser);
+		
+		visualSettings.add(new JSeparator());
 		
 		//Add Ball Size Settings
 		JMenu ballSizeMenu = new JMenu("Ball Size");
@@ -188,7 +190,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 			ballSizeMenu.add(ballSize);
 			bSizeGroup.add(ballSize);
 		}
-		colorSettings.add(ballSizeMenu);
+		visualSettings.add(ballSizeMenu);
 
 		frame.setJMenuBar(menuBar);
 

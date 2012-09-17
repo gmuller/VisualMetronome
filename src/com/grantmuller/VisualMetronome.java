@@ -79,7 +79,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 500, 100);
+		frame.setBounds(100, 100, 500, 110);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//frame.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 

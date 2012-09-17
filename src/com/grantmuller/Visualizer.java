@@ -43,7 +43,7 @@ public class Visualizer extends PApplet{
 		stroke(Color.WHITE.getRGB());
 		ellipseMode(RADIUS);
 		noLoop();
-		size(500, 100);
+		size(500, 110);
 	}
 
 	public void updateSize(int w, int ppq) {
@@ -75,7 +75,7 @@ public class Visualizer extends PApplet{
 			flash = false;
 		}
 
-		fill(backgroundColor, 50);
+		fill(backgroundColor, 80);
 		rect(0, 0, width, height);
 		fill(ballColor);
 		ellipse(xLoc, height-ballSize.size - 5, ballSize.size, ballSize.size);
@@ -137,10 +137,10 @@ public class Visualizer extends PApplet{
 	}
 	
 	enum BallSize {
-		SMALL("Small", 10, 80),
-		MEDIUM("Medium", 20, 100),
-		LARGE("Large", 40, 140),
-		EXTRA_LARGE("X-Large", 80, 220);
+		SMALL("Small", 10, 90),
+		MEDIUM("Medium", 20, 110),
+		LARGE("Large", 40, 150),
+		EXTRA_LARGE("X-Large", 80, 230);
 		
 		String displayName;
 		

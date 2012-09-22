@@ -5,7 +5,7 @@ import java.awt.Color;
 import processing.core.PApplet;
 
 public class Visualizer extends PApplet{
-	
+
 	private boolean reset;
 
 	private float xLoc = 20;
@@ -15,20 +15,22 @@ public class Visualizer extends PApplet{
 	private int location = 0;
 
 	private float[] steps;
-	
+
 	private int backgroundColor;
 
 	private int ballColor;
-	
+
 	private int flashColor;
-	
+
 	private float ballSize;
-		
+
+	private int opacity = 80;
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	public Visualizer(int backgroundColor, int ballColor, int flashColor) {
 		this.backgroundColor = backgroundColor;
 		this.ballColor = ballColor;
@@ -72,7 +74,7 @@ public class Visualizer extends PApplet{
 			flash = false;
 		}
 
-		fill(backgroundColor, 80);
+		fill(backgroundColor, opacity);
 		rect(0, 0, width, height);
 		fill(ballColor);
 		ellipse(xLoc, height-ballSize - 5, ballSize, ballSize);
@@ -113,7 +115,7 @@ public class Visualizer extends PApplet{
 		this.flashColor = flashColor;
 		redraw();
 	}
-	
+
 	public int getBackgroundColor() {
 		return backgroundColor;
 	}
@@ -124,5 +126,13 @@ public class Visualizer extends PApplet{
 
 	public int getFlashColor() {
 		return flashColor;
+	}
+
+	public int getOpacity() {
+		return opacity;
+	}
+
+	public void setOpacity(int opacity) {
+		this.opacity = opacity;
 	}
 }

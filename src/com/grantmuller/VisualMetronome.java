@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Calendar;
 import java.util.Hashtable;
 
 import javax.swing.ButtonGroup;
@@ -14,8 +15,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -52,7 +53,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 	private JColorChooser ballColorChooser;
 
 	private JColorChooser flashColorChooser;
-	
+
 	private JSlider opacitySlider;
 
 	private boolean started;
@@ -60,16 +61,25 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					VisualMetronome window = new VisualMetronome();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
+		Calendar expiry = Calendar.getInstance();
+		expiry.set(2013, 1, 31, 0, 0); // Expire at 31 Jan 2013
+		Calendar now = Calendar.getInstance();
+		if (now.after(expiry)) {
+			JOptionPane.showMessageDialog(null,
+					"The Visual Metronome Trial has Expired.\n Please contact Bob Lawliss (boblawliss@gmail.com) for more information.");
+			System.exit(0);
+		} else {
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						VisualMetronome window = new VisualMetronome();
+						window.frame.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	/**
@@ -189,21 +199,21 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 
 		JMenu opacitySettings = new JMenu("Tail Length");
 		visualSettings.add(opacitySettings);
-		
+
 		//Create the label table
 		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
 		labels.put(20, new JLabel("Long"));
 		labels.put(255, new JLabel("None"));
-		
+
 		this.opacitySlider = new JSlider(JSlider.VERTICAL,
-                20, 255, visualizer.getOpacity());
+				20, 255, visualizer.getOpacity());
 		this.opacitySlider.addChangeListener(this);
 		this.opacitySlider.setMajorTickSpacing(20);
 		this.opacitySlider.setPaintTicks(true);
 		this.opacitySlider.setLabelTable(labels);
 		opacitySlider.setPaintLabels(true);
 		opacitySettings.add(opacitySlider);
-		
+
 		frame.setJMenuBar(menuBar);
 		syncIn =  RWMidi.getInputDevices()[0].createInput();
 		if (syncIn != null){
@@ -267,7 +277,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 
 		Color flashColor = flashColorChooser.getColor();
 		visualizer.setFlashColor(flashColor.getRGB());
-		
+
 		visualizer.setOpacity(opacitySlider.getValue());
 	}
 }

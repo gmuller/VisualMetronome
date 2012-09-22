@@ -31,26 +31,28 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 	private Visualizer visualizer;
 
 	private MidiInput syncIn;
-	
+
 	private static int[] divisors = {1, 2, 3, 4, 5, 6, 7, 9, 11, 13};
-	
+
 	private static int[] barlengths = {1, 2, 4, 8};
-	
+
 	private static String[] ppqOptions = {"24","96"};
 
 	private int pulseCount = 0;
 
 	private int divisor = 4;
-	
+
 	private int barLength = 4;
 
 	private int ppq = 24;
-	
+
 	private JColorChooser bgChooser;
 
 	private JColorChooser ballColorChooser;
 
 	private JColorChooser flashColorChooser;
+
+	private boolean started;
 	/**
 	 * Launch the application.
 	 */
@@ -130,7 +132,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 			midiGroup.add(midiIn);
 		}
 		midiSettingsMenu.add(MIDI);
-				
+
 		ButtonGroup divisorGroup = new ButtonGroup();
 		JMenu divisorMenu = new JMenu("Beat Division");
 		for (int i : divisors) {
@@ -142,7 +144,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 			divisorGroup.add(divisor);
 		}
 		midiSettingsMenu.add(divisorMenu);
-		
+
 		ButtonGroup barlengthGroup = new ButtonGroup();
 		JMenu barLengthMenu = new JMenu("Bar Length");
 		for (int i : barlengths) {
@@ -154,31 +156,31 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 			barlengthGroup.add(bar);
 		}
 		midiSettingsMenu.add(barLengthMenu);
-		
+
 		//Add Color and Size Settings
 		JMenu visualSettings = new JMenu("Visuals");
 		menuBar.add(visualSettings);
-		
+
 		JMenu bgColorSettings = new JMenu("Background");
 		visualSettings.add(bgColorSettings);
 		this.bgChooser = new JColorChooser(new Color(visualizer.getBackgroundColor()));
 		this.bgChooser.getSelectionModel().addChangeListener(this);
 		bgColorSettings.add(bgChooser);
-		
+
 		JMenu ballColorSettings = new JMenu("Ball");
 		visualSettings.add(ballColorSettings);
 		this.ballColorChooser = new JColorChooser(new Color(visualizer.getBallColor()));
 		this.ballColorChooser.getSelectionModel().addChangeListener(this);
 		ballColorSettings.add(ballColorChooser);
-		
+
 		JMenu flashColorSettings = new JMenu("Flash");
 		visualSettings.add(flashColorSettings);
 		this.flashColorChooser = new JColorChooser(new Color(visualizer.getFlashColor()));
 		this.flashColorChooser.getSelectionModel().addChangeListener(this);
 		flashColorSettings.add(flashColorChooser);
-		
+
 		visualSettings.add(new JSeparator());
-		
+
 		//Add Ball Size Settings
 		JMenu ballSizeMenu = new JMenu("Ball Size");
 		ButtonGroup bSizeGroup = new ButtonGroup();
@@ -203,14 +205,16 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 	public void processEvents(SyncEvent syncEvent){
 		switch (syncEvent.getStatus()){
 		case SyncEvent.TIMING_CLOCK:
-			pulseCount++;
-			visualizer.step(pulseCount, ppq, divisor, barLength);
+			if (started) {
+				pulseCount++;
+				visualizer.step(pulseCount, ppq, divisor, barLength);
+			}
 			break;
 		case SyncEvent.START:
-			visualizer.started = true;
+			started = true;
 			break;
 		case SyncEvent.STOP:
-			visualizer.started = false;
+			started = false;
 			visualizer.reset();
 			pulseCount = 0;
 			break;
@@ -235,32 +239,24 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 				syncIn.plug(this, "processEvents");
 			}
 		}
-		
+
 		if (command.contains("divisor---")){
 			divisor = Integer.valueOf(command.split("---")[1]);
 		}
-		
+
 		if (command.contains("bar---")){
 			barLength = Integer.valueOf(command.split("---")[1]);
 		}
-		
-		if (command.contains("ball---")) {
-			String[] ball = command.split("---");
-			BallSize bSize = BallSize.valueOf(ball[1]);
-			int currentWidth = frame.getWidth();
-			frame.setSize(currentWidth, bSize.containerSize);
-			visualizer.setBallSize(bSize);
-		}
 	}
-	
+
 	public void stateChanged(ChangeEvent e) {
 		Color bgColor = bgChooser.getColor();
-	    visualizer.setBackgroundColor(bgColor.getRGB());
-	    
-	    Color ballColor = ballColorChooser.getColor();
-	    visualizer.setBallColor(ballColor.getRGB());
-	    
-	    Color flashColor = flashColorChooser.getColor();
-	    visualizer.setFlashColor(flashColor.getRGB());
+		visualizer.setBackgroundColor(bgColor.getRGB());
+
+		Color ballColor = ballColorChooser.getColor();
+		visualizer.setBallColor(ballColor.getRGB());
+
+		Color flashColor = flashColorChooser.getColor();
+		visualizer.setFlashColor(flashColor.getRGB());
 	}
 }

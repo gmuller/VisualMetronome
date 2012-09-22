@@ -24,8 +24,6 @@ public class Visualizer extends PApplet{
 	
 	private BallSize ballSize;
 	
-	public boolean started;
-
 	/**
 	 * 
 	 */
@@ -36,7 +34,6 @@ public class Visualizer extends PApplet{
 		this.ballColor = ballColor;
 		this.flashColor = flashColor;
 		ballSize = BallSize.MEDIUM;
-		this.started = false;
 	}
 
 	public void setup() {
@@ -127,13 +124,6 @@ public class Visualizer extends PApplet{
 
 	public int getFlashColor() {
 		return flashColor;
-	}
-	
-	public void setBallSize(BallSize ballSize) {
-		this.ballSize = ballSize;
-		if (!started) {
-			reset();
-		}
 	}
 	
 	enum BallSize {

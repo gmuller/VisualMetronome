@@ -22,8 +22,8 @@ public class Visualizer extends PApplet{
 	
 	private int flashColor;
 	
-	private BallSize ballSize;
-	
+	private float ballSize;
+		
 	/**
 	 * 
 	 */
@@ -33,22 +33,22 @@ public class Visualizer extends PApplet{
 		this.backgroundColor = backgroundColor;
 		this.ballColor = ballColor;
 		this.flashColor = flashColor;
-		ballSize = BallSize.MEDIUM;
 	}
 
 	public void setup() {
 		stroke(Color.WHITE.getRGB());
 		ellipseMode(RADIUS);
 		noLoop();
-		size(500, 110);
+		size(500, 100);
 	}
 
-	public void updateSize(int w, int ppq) {
+	public void updateSize(int h, int w, int ppq) {
+		ballSize = h/2 - 10;
 		int tableSize = 2 * ppq * 4;
-		float innerWidth = width - (2 * ballSize.size);
+		float innerWidth = width - (2 * ballSize);
 		float step = innerWidth/(ppq * 4f);
 		steps = new float[tableSize];
-		float start = ballSize.size;
+		float start = ballSize;
 		for (int i = 0; i < tableSize; i++) {
 			steps[i] = start;
 			if (i < (ppq * 4)) {
@@ -75,7 +75,7 @@ public class Visualizer extends PApplet{
 		fill(backgroundColor, 80);
 		rect(0, 0, width, height);
 		fill(ballColor);
-		ellipse(xLoc, height-ballSize.size - 5, ballSize.size, ballSize.size);
+		ellipse(xLoc, height-ballSize - 5, ballSize, ballSize);
 	}
 
 	public void step (int pulseCount, int ppq, int divisor, int barlength){
@@ -93,7 +93,7 @@ public class Visualizer extends PApplet{
 	}
 
 	public void reset() {
-		xLoc = ballSize.size;
+		xLoc = ballSize;
 		location = 0;
 		reset = true;
 		redraw();
@@ -124,24 +124,5 @@ public class Visualizer extends PApplet{
 
 	public int getFlashColor() {
 		return flashColor;
-	}
-	
-	enum BallSize {
-		SMALL("Small", 10, 90),
-		MEDIUM("Medium", 20, 110),
-		LARGE("Large", 40, 150),
-		EXTRA_LARGE("X-Large", 80, 230);
-		
-		String displayName;
-		
-		int size;
-		
-		int containerSize;
-		
-		BallSize(String name, int size, int containerSize) {
-			this.displayName = name;
-			this.size = size;
-			this.containerSize = containerSize;
-		}
 	}
 }

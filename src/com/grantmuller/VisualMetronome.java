@@ -22,8 +22,6 @@ import rwmidi.MidiInputDevice;
 import rwmidi.RWMidi;
 import rwmidi.SyncEvent;
 
-import com.grantmuller.Visualizer.BallSize;
-
 public class VisualMetronome implements ActionListener, ChangeListener {
 
 	private JFrame frame;
@@ -87,16 +85,21 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 
 		visualizer = new Visualizer(Color.BLACK.getRGB(), Color.RED.getRGB(), Color.GREEN.getRGB());
 		frame.getContentPane().add(visualizer);
+		frame.getContentPane().getWidth();
 		visualizer.init();
 		frame.addComponentListener(
 				new ComponentAdapter(){ 
-					int w;
+					int w, h;
 
 					@Override 
 					public void componentResized(ComponentEvent e) { 
 						JFrame f = (JFrame)e.getComponent(); 
-						w = f.getSize().width;
-						visualizer.updateSize(w, ppq);
+						w = f.getContentPane().getWidth();
+						h = f.getContentPane().getHeight();
+						visualizer.updateSize(h, w, ppq);
+						if (!started) {
+							visualizer.reset();
+						}
 					} 
 				});
 
@@ -181,21 +184,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 
 		visualSettings.add(new JSeparator());
 
-		//Add Ball Size Settings
-		JMenu ballSizeMenu = new JMenu("Ball Size");
-		ButtonGroup bSizeGroup = new ButtonGroup();
-		for (BallSize size : BallSize.values()) {
-			JRadioButtonMenuItem ballSize = new JRadioButtonMenuItem(size.displayName);
-			ballSize.setActionCommand("ball---"+ size);
-			ballSize.addActionListener(this);
-			if (size == BallSize.MEDIUM) ballSize.setSelected(true);
-			ballSizeMenu.add(ballSize);
-			bSizeGroup.add(ballSize);
-		}
-		visualSettings.add(ballSizeMenu);
-
 		frame.setJMenuBar(menuBar);
-
 		syncIn =  RWMidi.getInputDevices()[0].createInput();
 		if (syncIn != null){
 			syncIn.plug(this, "processEvents");
@@ -228,7 +217,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		String command = e.getActionCommand();
 		if (command.contains("ppq")) {
 			ppq = Integer.valueOf(command.substring(3, command.length()));
-			visualizer.updateSize(frame.getWidth(), ppq);
+			visualizer.updateSize(frame.getContentPane().getHeight(), frame.getContentPane().getWidth(), ppq);
 		}
 
 		if (command.contains("midi---")){

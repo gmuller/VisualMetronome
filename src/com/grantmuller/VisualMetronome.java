@@ -98,7 +98,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//frame.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 
-		visualizer = new Visualizer(Color.BLACK.getRGB(), Color.RED.getRGB(), Color.GREEN.getRGB());
+		visualizer = new Visualizer(Color.BLACK.getRGB(), Color.RED.getRGB(), Color.GREEN.getRGB(), ppq, divisor, barLength);
 		frame.getContentPane().add(visualizer);
 		frame.getContentPane().getWidth();
 		visualizer.init();
@@ -203,10 +203,10 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		//Create the label table
 		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
 		labels.put(20, new JLabel("Long"));
-		labels.put(255, new JLabel("None"));
+		labels.put(200, new JLabel("None"));
 
 		this.opacitySlider = new JSlider(JSlider.VERTICAL,
-				20, 255, visualizer.getOpacity());
+				20, 200, visualizer.getOpacity());
 		this.opacitySlider.addChangeListener(this);
 		this.opacitySlider.setMajorTickSpacing(20);
 		this.opacitySlider.setPaintTicks(true);
@@ -226,7 +226,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		case SyncEvent.TIMING_CLOCK:
 			if (started) {
 				pulseCount++;
-				visualizer.step(pulseCount, ppq, divisor, barLength);
+				visualizer.step(pulseCount);
 			}
 			break;
 		case SyncEvent.START:
@@ -248,6 +248,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		if (command.contains("ppq")) {
 			ppq = Integer.valueOf(command.substring(3, command.length()));
 			visualizer.updateSize(frame.getContentPane().getHeight(), frame.getContentPane().getWidth(), ppq);
+			visualizer.updateLengths(barLength, ppq, divisor);
 		}
 
 		if (command.contains("midi---")){
@@ -261,10 +262,12 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 
 		if (command.contains("divisor---")){
 			divisor = Integer.valueOf(command.split("---")[1]);
+			visualizer.updateLengths(barLength, ppq, divisor);
 		}
 
 		if (command.contains("bar---")){
 			barLength = Integer.valueOf(command.split("---")[1]);
+			visualizer.updateLengths(barLength, ppq, divisor);
 		}
 	}
 

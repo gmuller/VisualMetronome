@@ -6,13 +6,9 @@ import processing.core.PApplet;
 
 public class Visualizer extends PApplet{
 
-	private boolean reset;
-
 	private float xLoc = 20;
 	
 	private float yLoc;
-
-	private boolean flash = false;
 
 	private int location = 0;
 
@@ -25,6 +21,8 @@ public class Visualizer extends PApplet{
 	private int flashColor;
 
 	private float ballSize;
+	
+	private int fillColor;
 
 	private int opacity = 80;
 	
@@ -51,7 +49,7 @@ public class Visualizer extends PApplet{
 	public void setup() {
 		stroke(Color.WHITE.getRGB());
 		ellipseMode(RADIUS);
-		noLoop();
+		//noLoop();
 		size(500, 100);
 	}
 
@@ -74,21 +72,8 @@ public class Visualizer extends PApplet{
 	}
 
 	public void draw() {
-		if (reset) {
-			fill(backgroundColor);
-			rect(0, 0, width, height);
-			reset = false;
-		}
-
-		if (flash) {
-			fill(flashColor, opacity);
-			rect(0, 0, width, height);
-			flash = false;
-		} else {
-			fill(backgroundColor, opacity);
-			rect(0, 0, width, height);
-		}
-		
+		fill(fillColor);
+		rect(0, 0, width, height);
 		fill(ballColor);
 		ellipse(xLoc, yLoc, ballSize, ballSize);
 	}
@@ -100,22 +85,23 @@ public class Visualizer extends PApplet{
 		xLoc = steps[location];
 		location += barlength;
 		//System.out.println(location +" : " + pulseCount + " : " + xLoc);
+		fillColor = color(backgroundColor, opacity);
 		if (pulseCount % flashSize == 0) {
-			flash = true;
+			fillColor = flashColor;
 		}
-		redraw();
+		//redraw();
 	}
 
 	public void reset() {
 		xLoc = ballSize;
 		location = 0;
-		reset = true;
+		fillColor = backgroundColor;
 		redraw();
 	}
 
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
-		redraw();
+		//redraw();
 	}
 
 	public void setBallColor(int ballColor) {
@@ -125,7 +111,7 @@ public class Visualizer extends PApplet{
 
 	public void setFlashColor(int flashColor) {
 		this.flashColor = flashColor;
-		redraw();
+		//redraw();
 	}
 
 	public int getBackgroundColor() {

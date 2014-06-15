@@ -60,21 +60,22 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		Calendar expiry = Calendar.getInstance();
-		expiry.set(2013, 1, 31, 0, 0); // Expire at 31 Jan 2013
-		Calendar now = Calendar.getInstance();
+	public static void main(final String[] args) {
+		final Calendar expiry = Calendar.getInstance();
+		expiry.set(2013, 4, 30, 0, 0); // Expire at 31 Jan 2013
+		final Calendar now = Calendar.getInstance();
 		if (now.after(expiry)) {
 			JOptionPane.showMessageDialog(null,
 					"The Visual Metronome Trial has Expired.\n Please contact Bob Lawliss (boblawliss@gmail.com) for more information.");
 			System.exit(0);
 		} else {
 			EventQueue.invokeLater(new Runnable() {
+				@Override
 				public void run() {
 					try {
-						VisualMetronome window = new VisualMetronome();
+						final VisualMetronome window = new VisualMetronome();
 						window.frame.setVisible(true);
-					} catch (Exception e) {
+					} catch (final Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -103,30 +104,30 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		frame.getContentPane().getWidth();
 		visualizer.init();
 		frame.addComponentListener(
-				new ComponentAdapter(){ 
+				new ComponentAdapter(){
 					int w, h;
 
-					@Override 
-					public void componentResized(ComponentEvent e) { 
-						JFrame f = (JFrame)e.getComponent(); 
+					@Override
+					public void componentResized(final ComponentEvent e) {
+						final JFrame f = (JFrame)e.getComponent();
 						w = f.getContentPane().getWidth();
 						h = f.getContentPane().getHeight();
 						visualizer.updateSize(h, w, ppq);
 						if (!started) {
 							visualizer.reset();
 						}
-					} 
+					}
 				});
 
 		// Add Midi Settings
-		JMenuBar menuBar = new JMenuBar();
-		JMenu midiSettingsMenu = new JMenu("MIDI Settings");
+		final JMenuBar menuBar = new JMenuBar();
+		final JMenu midiSettingsMenu = new JMenu("MIDI Settings");
 		menuBar.add(midiSettingsMenu);
 
-		JMenu PPQ = new JMenu("PPQ");
-		ButtonGroup ppqGroup = new ButtonGroup();
-		for (String ppq : ppqOptions) {
-			JRadioButtonMenuItem ppqOpt = new JRadioButtonMenuItem(ppq);
+		final JMenu PPQ = new JMenu("PPQ");
+		final ButtonGroup ppqGroup = new ButtonGroup();
+		for (final String ppq : ppqOptions) {
+			final JRadioButtonMenuItem ppqOpt = new JRadioButtonMenuItem(ppq);
 			ppqOpt.setActionCommand("ppq" + ppq);
 			ppqOpt.addActionListener(this);
 			if (ppq.equals("24")) {
@@ -137,80 +138,86 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		}
 		midiSettingsMenu.add(PPQ);
 
-		ButtonGroup midiGroup = new ButtonGroup();
-		JMenu MIDI = new JMenu("Midi Input");
-		MidiInputDevice devices[] = RWMidi.getInputDevices();
+		final ButtonGroup midiGroup = new ButtonGroup();
+		final JMenu MIDI = new JMenu("Midi Input");
+		final MidiInputDevice devices[] = RWMidi.getInputDevices();
 		for (int i = 0; i < devices.length; i++) {
-			String deviceName = devices[i].getName();
-			JRadioButtonMenuItem midiIn = new JRadioButtonMenuItem(deviceName);
+			final String deviceName = devices[i].getName();
+			final JRadioButtonMenuItem midiIn = new JRadioButtonMenuItem(deviceName);
 			midiIn.setActionCommand("midi---"+ i);
 			midiIn.addActionListener(this);
-			if (i == 0) midiIn.setSelected(true);
+			if (i == 0) {
+				midiIn.setSelected(true);
+			}
 			MIDI.add(midiIn);
 			midiGroup.add(midiIn);
 		}
 		midiSettingsMenu.add(MIDI);
 
-		ButtonGroup divisorGroup = new ButtonGroup();
-		JMenu divisorMenu = new JMenu("Beat Division");
-		for (int i : divisors) {
-			JRadioButtonMenuItem divisor = new JRadioButtonMenuItem(String.valueOf(i));
+		final ButtonGroup divisorGroup = new ButtonGroup();
+		final JMenu divisorMenu = new JMenu("Beat Division");
+		for (final int i : divisors) {
+			final JRadioButtonMenuItem divisor = new JRadioButtonMenuItem(String.valueOf(i));
 			divisor.setActionCommand("divisor---"+ i);
 			divisor.addActionListener(this);
-			if (i == 4) divisor.setSelected(true);
+			if (i == 4) {
+				divisor.setSelected(true);
+			}
 			divisorMenu.add(divisor);
 			divisorGroup.add(divisor);
 		}
 		midiSettingsMenu.add(divisorMenu);
 
-		ButtonGroup barlengthGroup = new ButtonGroup();
-		JMenu barLengthMenu = new JMenu("Bar Length");
-		for (int i : barlengths) {
-			JRadioButtonMenuItem bar = new JRadioButtonMenuItem(String.valueOf(i));
+		final ButtonGroup barlengthGroup = new ButtonGroup();
+		final JMenu barLengthMenu = new JMenu("Bar Length");
+		for (final int i : barlengths) {
+			final JRadioButtonMenuItem bar = new JRadioButtonMenuItem(String.valueOf(i));
 			bar.setActionCommand("bar---"+ i);
 			bar.addActionListener(this);
-			if (i == 4) bar.setSelected(true);
+			if (i == 4) {
+				bar.setSelected(true);
+			}
 			barLengthMenu.add(bar);
 			barlengthGroup.add(bar);
 		}
 		midiSettingsMenu.add(barLengthMenu);
 
 		//Add Color and Size Settings
-		JMenu visualSettings = new JMenu("Visuals");
+		final JMenu visualSettings = new JMenu("Visuals");
 		menuBar.add(visualSettings);
 
-		JMenu bgColorSettings = new JMenu("Background");
+		final JMenu bgColorSettings = new JMenu("Background");
 		visualSettings.add(bgColorSettings);
-		this.bgChooser = new JColorChooser(new Color(visualizer.getBackgroundColor()));
-		this.bgChooser.getSelectionModel().addChangeListener(this);
+		bgChooser = new JColorChooser(new Color(visualizer.getBackgroundColor()));
+		bgChooser.getSelectionModel().addChangeListener(this);
 		bgColorSettings.add(bgChooser);
 
-		JMenu ballColorSettings = new JMenu("Ball");
+		final JMenu ballColorSettings = new JMenu("Ball");
 		visualSettings.add(ballColorSettings);
-		this.ballColorChooser = new JColorChooser(new Color(visualizer.getBallColor()));
-		this.ballColorChooser.getSelectionModel().addChangeListener(this);
+		ballColorChooser = new JColorChooser(new Color(visualizer.getBallColor()));
+		ballColorChooser.getSelectionModel().addChangeListener(this);
 		ballColorSettings.add(ballColorChooser);
 
-		JMenu flashColorSettings = new JMenu("Flash");
+		final JMenu flashColorSettings = new JMenu("Flash");
 		visualSettings.add(flashColorSettings);
-		this.flashColorChooser = new JColorChooser(new Color(visualizer.getFlashColor()));
-		this.flashColorChooser.getSelectionModel().addChangeListener(this);
+		flashColorChooser = new JColorChooser(new Color(visualizer.getFlashColor()));
+		flashColorChooser.getSelectionModel().addChangeListener(this);
 		flashColorSettings.add(flashColorChooser);
 
-		JMenu opacitySettings = new JMenu("Tail Length");
+		final JMenu opacitySettings = new JMenu("Tail Length");
 		visualSettings.add(opacitySettings);
 
 		//Create the label table
-		Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
+		final Hashtable<Integer, JLabel> labels = new Hashtable<Integer, JLabel>();
 		labels.put(20, new JLabel("Long"));
 		labels.put(200, new JLabel("None"));
 
-		this.opacitySlider = new JSlider(JSlider.VERTICAL,
+		opacitySlider = new JSlider(JSlider.VERTICAL,
 				20, 200, visualizer.getOpacity());
-		this.opacitySlider.addChangeListener(this);
-		this.opacitySlider.setMajorTickSpacing(20);
-		this.opacitySlider.setPaintTicks(true);
-		this.opacitySlider.setLabelTable(labels);
+		opacitySlider.addChangeListener(this);
+		opacitySlider.setMajorTickSpacing(20);
+		opacitySlider.setPaintTicks(true);
+		opacitySlider.setLabelTable(labels);
 		opacitySlider.setPaintLabels(true);
 		opacitySettings.add(opacitySlider);
 
@@ -221,30 +228,9 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		}
 	}
 
-	public void processEvents(SyncEvent syncEvent){
-		switch (syncEvent.getStatus()){
-		case SyncEvent.TIMING_CLOCK:
-			if (started) {
-				pulseCount++;
-				visualizer.step(pulseCount);
-			}
-			break;
-		case SyncEvent.START:
-			started = true;
-			break;
-		case SyncEvent.STOP:
-			started = false;
-			visualizer.reset();
-			pulseCount = 0;
-			break;
-		case SyncEvent.SONG_POSITION_POINTER:
-			break;
-		}
-	}
-
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		String command = e.getActionCommand();
+	public void actionPerformed(final ActionEvent e) {
+		final String command = e.getActionCommand();
 		if (command.contains("ppq")) {
 			ppq = Integer.valueOf(command.substring(3, command.length()));
 			visualizer.updateSize(frame.getContentPane().getHeight(), frame.getContentPane().getWidth(), ppq);
@@ -252,7 +238,7 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		}
 
 		if (command.contains("midi---")){
-			int midiIn = Integer.valueOf(command.split("---")[1]);
+			final int midiIn = Integer.valueOf(command.split("---")[1]);
 			syncIn.closeMidi();
 			syncIn =  RWMidi.getInputDevices()[midiIn].createInput();
 			if (syncIn != null){
@@ -271,16 +257,40 @@ public class VisualMetronome implements ActionListener, ChangeListener {
 		}
 	}
 
-	public void stateChanged(ChangeEvent e) {
-		Color bgColor = bgChooser.getColor();
+	@Override
+	public void stateChanged(final ChangeEvent e) {
+		final Color bgColor = bgChooser.getColor();
 		visualizer.setBackgroundColor(bgColor.getRGB());
 
-		Color ballColor = ballColorChooser.getColor();
+		final Color ballColor = ballColorChooser.getColor();
 		visualizer.setBallColor(ballColor.getRGB());
 
-		Color flashColor = flashColorChooser.getColor();
+		final Color flashColor = flashColorChooser.getColor();
 		visualizer.setFlashColor(flashColor.getRGB());
 
 		visualizer.setOpacity(opacitySlider.getValue());
+	}
+
+	public void processEvents(final SyncEvent syncEvent){
+		switch (syncEvent.getStatus()){
+		case SyncEvent.TIMING_CLOCK:
+			if (started) {
+				pulseCount++;
+				visualizer.step(pulseCount);
+			}
+			break;
+		case SyncEvent.START:
+			started = true;
+			visualizer.isStarted(true);
+			break;
+		case SyncEvent.STOP:
+			started = false;
+			visualizer.isStarted(false);
+			visualizer.reset();
+			pulseCount = 0;
+			break;
+		case SyncEvent.SONG_POSITION_POINTER:
+			break;
+		}
 	}
 }

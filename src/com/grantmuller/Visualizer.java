@@ -7,7 +7,9 @@ import processing.core.PApplet;
 public class Visualizer extends PApplet{
 
 	private float xLoc = 20;
-	
+
+	private float xPrev = 20;
+
 	private float yLoc;
 
 	private int location = 0;
@@ -21,18 +23,20 @@ public class Visualizer extends PApplet{
 	private int flashColor;
 
 	private float ballSize;
-	
+
 	private int fillColor;
 
 	private int opacity = 80;
-	
+
 	private int barlength = 4;
-	
+
 	private int size;
-	
+
 	private int xLocationSize; 
-	
+
 	private float flashSize;
+
+	private boolean started;
 
 	/**
 	 * 
@@ -49,7 +53,7 @@ public class Visualizer extends PApplet{
 	public void setup() {
 		stroke(Color.WHITE.getRGB());
 		ellipseMode(RADIUS);
-		//noLoop();
+		noLoop();
 		size(500, 100);
 	}
 
@@ -76,20 +80,25 @@ public class Visualizer extends PApplet{
 		rect(0, 0, width, height);
 		fill(ballColor);
 		ellipse(xLoc, yLoc, ballSize, ballSize);
+		if (started) {
+			fill(ballColor, 180);
+			ellipse(xPrev, yLoc, ballSize, ballSize);
+		}
 	}
 
 	public void step (int pulseCount) {
+		xPrev = steps[location];
+		location += barlength;
 		if (pulseCount % xLocationSize == 0) {
 			location = 0;
 		}
 		xLoc = steps[location];
-		location += barlength;
-		//System.out.println(location +" : " + pulseCount + " : " + xLoc);
 		fillColor = color(backgroundColor, opacity);
-		if (pulseCount % flashSize == 0) {
+		//System.out.println(pulseCount % flashSize);
+		if (pulseCount % flashSize < 5) {
 			fillColor = flashColor;
 		}
-		//redraw();
+		redraw();
 	}
 
 	public void reset() {
@@ -101,7 +110,7 @@ public class Visualizer extends PApplet{
 
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
-		//redraw();
+		redraw();
 	}
 
 	public void setBallColor(int ballColor) {
@@ -111,7 +120,7 @@ public class Visualizer extends PApplet{
 
 	public void setFlashColor(int flashColor) {
 		this.flashColor = flashColor;
-		//redraw();
+		redraw();
 	}
 
 	public int getBackgroundColor() {
@@ -133,11 +142,15 @@ public class Visualizer extends PApplet{
 	public void setOpacity(int opacity) {
 		this.opacity = opacity;
 	}
-	
+
 	public void updateLengths(int barLength, int ppq, int divisor) {
 		this.barlength = barLength;
 		this.size = 8/barLength;
 		this.xLocationSize = size * ppq;
 		this.flashSize = size/2f * ppq * divisor;
+	}
+
+	public void isStarted(boolean b) {
+		started = b;
 	}
 }
